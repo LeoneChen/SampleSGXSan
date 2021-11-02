@@ -1,0 +1,11 @@
+*.ll
+*.o
+*_u.*
+*_t.*
+vtune
+*.bc
+enclave.so.resolution.txt
+app
+enclave.so
+enclave.signed.so
+.config_*

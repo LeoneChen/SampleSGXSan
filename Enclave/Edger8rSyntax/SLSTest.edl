@@ -1,0 +1,7 @@
+enclave
+{
+    trusted
+    {
+        public void ecall_test_sensitive_leak_san([out] char leak[15]);
+    };
+};

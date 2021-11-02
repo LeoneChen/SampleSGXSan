@@ -190,7 +190,10 @@ int SGX_CDECL main(int argc, char *argv[])
         getchar();
         return -1; 
     }
- 
+    // test sgxsan_edge_check function
+    char leak[15];
+    ecall_test_sensitive_leak_san(global_eid, leak);
+    sgxsan_test_edge_check();
     /* Utilize edger8r attributes */
     edger8r_array_attributes();
     edger8r_pointer_attributes();

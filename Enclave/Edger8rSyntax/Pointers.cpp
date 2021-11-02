@@ -44,8 +44,8 @@
  */
 int32_t checksum_internal(char* buf, size_t count)
 {
-    register int32_t sum = 0;
-    int16_t* ptr = (int16_t*)buf;
+    int32_t sum = 0;
+    int16_t* ptr = reinterpret_cast<int16_t*>(buf);
 
     /* Main summing loop */
     while (count > 1) {
