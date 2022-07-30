@@ -6,6 +6,11 @@ enclave.so
         enclave_entry;
         g_peak_heap_used;
         g_peak_rsrv_mem_committed;
+        sgx_ecall;
+        sgx_ecall_switchless;
+        sgx_create_enclave;
+        sgx_create_enclave_ex;
+        sgx_destroy_enclave;
     local:
         *;
 };

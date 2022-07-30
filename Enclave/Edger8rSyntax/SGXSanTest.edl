@@ -1,0 +1,15 @@
+enclave
+{
+    trusted
+    {
+        public void ecall_get_ssa_addr([user_check] void **ssa);
+        public void ecall_use_ssa_addr([user_check] void *ssa);
+        public void ecall_use_array([in] int arr[5][6][7]);
+        public void ecall_test_sensitive_leak_san([out] char leak[15]);
+    };
+
+    untrusted
+    {
+        int* ocall_test([in, out]int **ptr);
+    };
+};
