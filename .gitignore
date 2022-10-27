@@ -1,0 +1,14 @@
+*.o
+*_u.*
+*_t.*
+.config_*
+*.json
+*.ll
+*.bc
+*.tmp
+vtune
+app
+enclave.so*
+enclave.signed.so
+seeds
+crashes

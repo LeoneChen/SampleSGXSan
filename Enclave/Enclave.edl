@@ -50,6 +50,8 @@ enclave {
     from "TrustedLibrary/Libcxx.edl" import ecall_exception, ecall_map;
     from "TrustedLibrary/Thread.edl" import *;
 
+    from "Edger8rSyntax/SGXSanTest.edl" import *;
+    from "SGXSanRTEnclave.edl" import *;
     /* 
      * ocall_print_string - invokes OCALL to display string buffer inside the enclave.
      *  [in]: copy the string buffer to App outside.
