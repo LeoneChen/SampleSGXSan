@@ -67,6 +67,12 @@ enclave {
         uint64_t union_foo_3;
     };
 
+    struct struct_dc_t {
+        uint32_t count;
+        size_t size;
+        [count = 10, size = size] uint64_t* buf;
+    };
+
     trusted {
 
         public void ecall_type_char(char val);
@@ -81,6 +87,7 @@ enclave {
         public void ecall_type_struct(struct struct_foo_t val);
         public void ecall_type_enum_union(enum enum_foo_t val1, [user_check] union union_foo_t *val2);
         
+        public void test_ecall_deep_copy([user_check] struct struct_dc_t * ptr);
         /* for using user defined types, please refer to Pointers.edl, Arrays.edl. */
     };
 

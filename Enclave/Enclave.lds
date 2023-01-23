@@ -6,6 +6,8 @@ enclave.so
         enclave_entry;
         g_peak_heap_used;
         g_peak_rsrv_mem_committed;
+        tsticker_ecall;
+        check_ecall;
     local:
         *;
 };

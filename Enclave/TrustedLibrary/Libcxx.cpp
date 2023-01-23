@@ -32,6 +32,7 @@
 
 #include <cstdlib>
 #include <string>
+#include <stdexcept> // for std::runtime_error
 
 #include "../Enclave.h"
 #include "Enclave_t.h"

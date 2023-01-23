@@ -176,6 +176,19 @@ void ocall_print_string(const char *str)
     printf("%s", str);
 }
 
+void sgxsan_test_edge_check(void) {
+    // test sgxsan_edge_check
+    void *ssa = nullptr;
+    ecall_get_ssa_addr(global_eid, &ssa);
+    ecall_use_ssa_addr(global_eid, ssa);
+    int test_arr[5][6][7] = {{{0}}};
+    ecall_use_array(global_eid, test_arr);
+}
+
+int *ocall_test(int **ptr) {
+    *ptr = (int *)ocall_test;
+    return (int *)sgxsan_test_edge_check;
+}
 
 /* Application entry */
 int SGX_CDECL main(int argc, char *argv[])
@@ -191,6 +204,10 @@ int SGX_CDECL main(int argc, char *argv[])
         return -1; 
     }
  
+    // test sgxsan_edge_check function
+    char leak[15];
+    ecall_test_sensitive_leak_san(global_eid, leak);
+    sgxsan_test_edge_check();
     /* Utilize edger8r attributes */
     edger8r_array_attributes();
     edger8r_pointer_attributes();

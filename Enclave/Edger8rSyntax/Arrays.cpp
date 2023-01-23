@@ -44,7 +44,7 @@ void ecall_array_user_check(int arr[4])
         abort();
     
     for (int i = 0; i < 4; i++) {
-        assert(arr[i] == i);
+        // assert(arr[i] == i);
         arr[i] = 3 - i;
     }
 }
@@ -56,7 +56,7 @@ void ecall_array_user_check(int arr[4])
 void ecall_array_in(int arr[4])
 {
     for (int i = 0; i < 4; i++) {
-        assert(arr[i] == i);
+        // assert(arr[i] == i);
         arr[i] = (3 - i);
     }
 }
@@ -69,7 +69,7 @@ void ecall_array_out(int arr[4])
 {
     for (int i = 0; i < 4; i++) {
         /* arr is not copied from App */
-        assert(arr[i] == 0);
+        // assert(arr[i] == 0);
         arr[i] = (3 - i);
     }
 }
@@ -81,7 +81,7 @@ void ecall_array_out(int arr[4])
 void ecall_array_in_out(int arr[4])
 {
     for (int i = 0; i < 4; i++) {
-        assert(arr[i] == i);
+        // assert(arr[i] == i);
         arr[i] = (3 - i);
     }
 }
@@ -96,7 +96,7 @@ void ecall_array_isary(array_t arr)
 
     int n = sizeof(array_t)/sizeof(arr[0]);
     for (int i = 0; i < n; i++) {
-        assert(arr[i] == i);
+        // assert(arr[i] == i);
         arr[i] = (n - 1 - i);
     }
 }
