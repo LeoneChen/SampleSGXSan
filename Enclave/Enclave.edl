@@ -49,6 +49,7 @@ enclave {
     from "TrustedLibrary/Libc.edl" import *;
     from "TrustedLibrary/Libcxx.edl" import ecall_exception, ecall_map;
     from "TrustedLibrary/Thread.edl" import *;
+    from "TrustedLibrary/StringHookTests.edl" import *;
 
     /* 
      * ocall_print_string - invokes OCALL to display string buffer inside the enclave.

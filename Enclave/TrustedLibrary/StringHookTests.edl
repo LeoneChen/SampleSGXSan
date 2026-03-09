@@ -1,0 +1,29 @@
+/*
+ * StringHookTests.edl - EDL for string hook tests
+ */
+
+enclave {
+
+    trusted {
+        /*
+         * ecall_test_string_hooks - Run comprehensive tests for all 32 __sgxsan_ hooks
+         *  Tests 5 categories:
+         *   1. Safe memory operations (3 functions)
+         *   2. Known-size operations (12 functions)
+         *   3. Safe (_s) functions (6 functions)
+         *   4. NUL-terminated functions (8 functions)
+         *   5. BSD/POSIX functions (3 functions)
+         *  Note: strcpy, strcat, stpcpy, strdup are deprecated in SGX and not tested
+         */
+        public void ecall_test_string_hooks(void);
+        /*
+         * ecall_test_string_hooks_oob - Run one OOB negative test by ID.
+         *  Each test intentionally triggers an out-of-bounds access.
+         *  Expected outcome: SGXSan detects it, calls abort(), enclave crashes.
+         *  Host should observe SGX_ERROR_ENCLAVE_CRASHED on success.
+         *  valid test_id range: [0, 6]  (OOB_TEST_COUNT - 1)
+         */
+        public void ecall_test_string_hooks_oob(int test_id);
+    };
+
+};
