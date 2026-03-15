@@ -85,6 +85,8 @@ endif
 
 App_Cpp_Files := App/App.cpp $(wildcard App/Edger8rSyntax/*.cpp) $(wildcard App/TrustedLibrary/*.cpp)
 App_Include_Paths := -IInclude -IApp -I$(SGX_SDK)/include
+App_Cpp_Files += App/harness.cpp
+App_Include_Paths += -I$(SGX_SDK)/../llvm-project/lib/clang/13.0.1/include/fuzzer
 
 App_C_Flags := -fPIC -Wno-attributes $(App_Include_Paths)
 
@@ -101,7 +103,7 @@ else
 endif
 
 App_Cpp_Flags := $(App_C_Flags)
-App_Link_Flags := -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -lpthread 
+App_Link_Flags := -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -lpthread
 
 App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
 
@@ -121,7 +123,7 @@ Crypto_Library_Name := sgx_tcrypto
 Enclave_Cpp_Files := Enclave/Enclave.cpp $(wildcard Enclave/Edger8rSyntax/*.cpp) $(wildcard Enclave/TrustedLibrary/*.cpp)
 Enclave_Include_Paths := -IInclude -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/libcxx
 
-Enclave_C_Flags := $(Enclave_Include_Paths) -nostdinc -fvisibility=hidden -fpie -ffunction-sections -fdata-sections $(MITIGATION_CFLAGS)
+Enclave_C_Flags := $(Enclave_Include_Paths) -fvisibility=hidden -fpie -ffunction-sections -fdata-sections $(MITIGATION_CFLAGS)
 CC_BELOW_4_9 := $(shell expr "`$(CC) -dumpversion`" \< "4.9")
 ifeq ($(CC_BELOW_4_9), 1)
 	Enclave_C_Flags += -fstack-protector
@@ -129,7 +131,7 @@ else
 	Enclave_C_Flags += -fstack-protector-strong
 endif
 
-Enclave_Cpp_Flags := $(Enclave_C_Flags) -nostdinc++
+Enclave_Cpp_Flags := $(Enclave_C_Flags)
 
 # Enable the security flags
 Enclave_Security_Link_Flags := -Wl,-z,relro,-z,now,-z,noexecstack
@@ -142,13 +144,13 @@ Enclave_Security_Link_Flags := -Wl,-z,relro,-z,now,-z,noexecstack
 # Do NOT move the libraries linked with `--start-group' and `--end-group' within `--whole-archive' and `--no-whole-archive' options.
 # Otherwise, you may get some undesirable errors.
 Enclave_Link_Flags := $(MITIGATION_LDFLAGS) $(Enclave_Security_Link_Flags) \
-    -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L$(SGX_TRUSTED_LIBRARY_PATH) \
-	-Wl,--whole-archive -l$(Trts_Library_Name) -Wl,--no-whole-archive \
+    -L$(SGX_TRUSTED_LIBRARY_PATH) \
+	-Wl,--whole-archive -lsgxsan_enclave_v -l$(Trts_Library_Name) -Wl,--no-whole-archive \
 	-Wl,--start-group -lsgx_tstdc -lsgx_tcxx -l$(Crypto_Library_Name) -l$(Service_Library_Name) -Wl,--end-group \
-	-Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
-	-Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
+	-Wl,-Bsymbolic \
+	-Wl,-eenclave_entry -Wl,--export-dynamic  \
 	-Wl,--defsym,__ImageBase=0 -Wl,--gc-sections   \
-	-Wl,--version-script=Enclave/Enclave.lds
+	--shared
 
 Enclave_Cpp_Objects := $(sort $(Enclave_Cpp_Files:.cpp=.o))
 
@@ -174,6 +176,16 @@ else
 endif
 endif
 
+App_Link_Flags += -Wl,-rpath-link,$(SGX_LIBRARY_PATH) -ldl -Wl,-whole-archive -lsgxsan_host_v -Wl,-no-whole-archive -rdynamic -L$(SGX_SDK)/../llvm-project/lib/clang/13.0.1/lib/linux -lclang_rt.fuzzer-x86_64
+
+ifneq ($(SGX_MODE), HW)
+	App_Link_Flags += -lsgx_uae_service_sim
+else
+	App_Link_Flags += -lsgx_uae_service
+endif
+
+Enclave_C_Flags += -fsanitize=address -mllvm -asan-enclave-v -mllvm -asan-use-after-return=never -mllvm -asan-opt-globals=false -fsanitize-coverage=inline-8bit-counters,pc-table -fno-discard-value-names
+Enclave_Cpp_Flags += -fsanitize=address -mllvm -asan-enclave-v -mllvm -asan-use-after-return=never -mllvm -asan-opt-globals=false -fsanitize-coverage=inline-8bit-counters,pc-table -fno-discard-value-names
 
 .PHONY: all target run
 all: .config_$(Build_Mode)_$(SGX_ARCH)
@@ -242,6 +254,7 @@ Enclave/Enclave_t.h: $(SGX_EDGER8R) Enclave/Enclave.edl
 	@echo "GEN  =>  $@"
 
 Enclave/Enclave_t.c: Enclave/Enclave_t.h
+	@clang-format-13 -i $@
 
 Enclave/Enclave_t.o: Enclave/Enclave_t.c
 	@$(CC) $(SGX_COMMON_CFLAGS) $(Enclave_C_Flags) -c $< -o $@
@@ -256,7 +269,7 @@ $(Enclave_Name): Enclave/Enclave_t.o $(Enclave_Cpp_Objects)
 	@echo "LINK =>  $@"
 
 $(Signed_Enclave_Name): $(Enclave_Name)
-	@$(SGX_ENCLAVE_SIGNER) sign -key Enclave/Enclave_private_test.pem -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
+	@cp -f $(Enclave_Name) $(Signed_Enclave_Name)
 	@echo "SIGN =>  $@"
 
 .PHONY: clean

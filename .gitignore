@@ -1,0 +1,6 @@
+*.o
+Enclave_[ut].[ch]
+.config_*
+app
+enclave.so*
+enclave.signed.so
